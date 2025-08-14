@@ -1,28 +1,31 @@
 import { PDFViewer } from '@react-pdf/renderer';
-import Invoice from './components/pdf/invoice.jsx';
+import Invoice from '../components/pdf/invoice.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Navbar from './components/navbar.jsx';
-import Footer from './components/footer.jsx';
+import Navbar from '../components/navbar.jsx';
+import Footer from '../components/footer.jsx';
 const styles = {
-    main:{
+  main: {
     display: 'flex',
     height: '100vh',
-},
-    leftSection: {
+    background: 'var(--bg)',
+    color: 'var(--text)'
+  },
+  leftSection: {
     overflowY: 'auto',
     height: '100vh',
     padding: '2rem',
     width: '50%',
-    backgroundColor: '#f8f9fa', /* Light background for contrast */
-    borderRight: '1px solid #dee2e6',
-    },
-    rightSection: {
-        overflowY: 'auto',
-        height: '100vh',
-        padding: '2rem',
-        width: '50%',
-        backgroundColor: '#ffffff', /* White background for PDF viewer */
-    }
+    backgroundColor: 'var(--bg-elev)', /* Themed background */
+    borderRight: '1px solid var(--border)',
+  },
+  rightSection: {
+    overflowY: 'auto',
+    height: '100vh',
+    padding: '2rem',
+    width: '50%',
+    backgroundColor: 'var(--bg-elev)', /* Themed background for PDF viewer */
+    color: 'var(--text)'
+  }
 };
 function Classroom() {
   return (

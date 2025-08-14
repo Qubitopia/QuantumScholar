@@ -1,0 +1,121 @@
+/* Utilities for Home page */
+/* Theme variables */
+:root[data-theme='light'] {
+	--bg: #f8fafc;
+	--bg-elev: #ffffff;
+	--text: #0f172a;
+	--muted: #64748b;
+	--border: rgba(15,23,42,0.08);
+	--card-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.18), 0 6px 16px -8px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='dark'] {
+	--bg: #0b1220;
+	--bg-elev: #0f172a;
+	--text: #e2e8f0;
+	--muted: #94a3b8;
+	--border: rgba(148,163,184,0.15);
+	--card-shadow: 0 10px 30px -12px rgba(0,0,0,0.6), 0 6px 16px -8px rgba(0,0,0,0.45);
+}
+
+html, body, #root {
+	height: 100%;
+}
+
+body {
+	color: var(--text);
+	background: var(--bg);
+}
+
+/* Utilities for Home page */
+.gradient-text {
+	background: linear-gradient(90deg, #0d6efd, #20c997, #6f42c1);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.glass {
+	background: color-mix(in srgb, var(--bg-elev) 85%, transparent);
+	backdrop-filter: saturate(120%) blur(8px);
+	-webkit-backdrop-filter: saturate(120%) blur(8px);
+	border: 1px solid var(--border);
+}
+
+.shadow-soft {
+	box-shadow: var(--card-shadow);
+}
+
+.icon-circle {
+	display: inline-flex;
+	width: 40px;
+	height: 40px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+}
+
+.search-input::placeholder {
+	color: #94a3b8;
+}
+
+.floating-badges .badge {
+	border: 1px solid var(--border);
+}
+
+/* Generic themed surfaces */
+.surface {
+	background: var(--bg-elev);
+	color: var(--text);
+	border: 1px solid var(--border);
+}
+
+/* Chips that look good in both themes */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: 9999px;
+	font-size: 0.85rem;
+	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+	color: var(--text);
+}
+
+/* Outline button that adapts to theme */
+.btn-outline-surface {
+	border: 1px solid var(--border) !important;
+	color: var(--text) !important;
+	background: transparent !important;
+}
+.btn-outline-surface:hover {
+	background: color-mix(in srgb, var(--bg-elev) 88%, transparent) !important;
+}
+
+/* Inputs inside glass containers should blend in */
+.glass .form-control {
+	background: transparent !important;
+	color: var(--text) !important;
+}
+.glass .form-control::placeholder {
+	color: var(--muted) !important;
+}
+.glass .input-group-text {
+	color: var(--muted) !important;
+}
+
+/* Generic inputs */
+input, textarea, select {
+	background: var(--bg-elev);
+	color: var(--text);
+	border: 1px solid var(--border);
+}
+input::placeholder, textarea::placeholder {
+	color: var(--muted);
+}
+.form-control, .form-select {
+	background-color: var(--bg-elev) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}
