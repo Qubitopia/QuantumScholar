@@ -1,11 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/navbar.jsx';
 import { useTheme } from '../common/theme.jsx';
-import { FiUser, FiMail, FiBell, FiLock, FiMonitor, FiCreditCard, FiSliders } from 'react-icons/fi';
+import { FiUser, FiBell, FiLock, FiMonitor, FiCreditCard, FiSliders } from 'react-icons/fi';
 import { TfiPlug } from "react-icons/tfi";
-const sectionss = [
+import { getCookie, setCookie, deleteCookie } from '../common/cookie.js';
+import { apiPost } from '../common/api.js';
+import { apiPut } from '../common/api.js';
+const sections = [
     { id: 'profile', label: 'Profile', icon: FiUser },
-    { id: 'account', label: 'Account', icon: FiMail },
     { id: 'privacy', label: 'Privacy', icon: FiLock },
     { id: 'notifications', label: 'Notifications', icon: FiBell },
     { id: 'appearance', label: 'Appearance', icon: FiMonitor },
@@ -13,13 +15,13 @@ const sectionss = [
     { id: 'billing', label: 'Billing', icon: FiCreditCard },
     { id: 'advanced', label: 'Advanced', icon: FiSliders },
 ];
-const sections = [
+const limitedSections = [
     { id: 'appearance', label: 'Appearance', icon: FiMonitor },
     { id: 'billing', label: 'Billing', icon: FiCreditCard },
     { id: 'advanced', label: 'Advanced', icon: FiSliders },
 ];
 
-function Sidebar({ active, onSelect }) {
+function Sidebar({ items, active, onSelect }) {
     return (
         <aside style={{
             width: 260,
@@ -29,7 +31,7 @@ function Sidebar({ active, onSelect }) {
         }} className="d-none d-md-block">
             <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>USER SETTINGS</div>
             <nav style={{ display: 'grid', gap: 6 }}>
-                {sections.map(({ id, label, icon: Icon }) => {
+                {items.map(({ id, label, icon: Icon }) => {
                     const selected = id === active;
                     return (
                         <button key={id} onClick={() => onSelect(id)}
@@ -53,7 +55,7 @@ function Sidebar({ active, onSelect }) {
     );
 }
 
-function MobileSectionPicker({ active, onSelect }) {
+function MobileSectionPicker({ items, active, onSelect }) {
     return (
         <div className="d-md-none" style={{
             borderBottom: '1px solid var(--border)',
@@ -64,7 +66,7 @@ function MobileSectionPicker({ active, onSelect }) {
                 Settings section
             </label>
             <select id="section" value={active} onChange={(e) => onSelect(e.target.value)} className="form-select mt-1">
-                {sections.map(s => (
+                {items.map(s => (
                     <option key={s.id} value={s.id}>{s.label}</option>
                 ))}
             </select>
@@ -93,52 +95,102 @@ function AppearancePanel() {
     );
 }
 
-function ProfilePanel() {
+function ProfilePanel({ user, onUserUpdate }) {
+    const [name, setName] = useState('');
+    const [saved, setSaved] = useState(false);
+
+    useEffect(() => {
+        setName(user?.Name || user?.name || '');
+        setSaved(false);
+    }, [user]);
+        const originalName = useMemo(() => user?.Name || user?.name || '', [user]);
+        const changed = (name ?? '') !== originalName;
+
+    const fmt = (value) => {
+        if (!value) return '';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return String(value);
+        try {
+            return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
+        } catch {
+            return d.toLocaleString();
+        }
+    };
+
+    const saveName = () => {
+        if (!user) return;
+        const updated = { ...user, Name: name };
+        setCookie('qs-user', JSON.stringify(updated), { days: 7 });
+        const token = getCookie('qs-token');
+        apiPut('/api/profile', { 'Name': name }, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
+            onUserUpdate && onUserUpdate(updated);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        });
+    };
+
+    const deactivate = () => {
+        // Clear cookie and reset user in parent
+        deleteCookie('qs-user', { path: '/' });
+        onUserUpdate && onUserUpdate(null);
+    };
+
+    const logout = async () => {
+        deleteCookie('qs-user', { path: '/' });
+        deleteCookie('qs-token', { path: '/' });
+    };
+
     return (
         <section>
             <h2 className="h5 fw-bold mb-3">Profile</h2>
-            <div className="row g-3">
-                <div className="col-md-6">
-                    <label className="form-label">Display name</label>
-                    <input className="form-control" placeholder="Your name" />
+            {user ? (
+                <div className="row g-3">
+                    <div className="col-md-6">
+                        <label className="form-label">Name</label>
+                        <input className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Email</label>
+                        <input className="form-control" value={user.public_email || user.email || ''} disabled />
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label">User ID</label>
+                        <input className="form-control" value={user.id ?? ''} disabled />
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label">QS Coins</label>
+                        <input className="form-control" value={user.qs_coins ?? 0} disabled />
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label">Active</label>
+                        <input className="form-control" value={String(user.is_active ?? '')} disabled />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Created At</label>
+                        <input className="form-control" value={fmt(user.created_at)} disabled />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Updated At</label>
+                        <input className="form-control" value={fmt(user.updated_at)} disabled />
+                    </div>
+                    <div className="col-12 d-flex align-items-center gap-2 mt-2">
+                        {changed && name?.trim() && (
+                            <button className="btn btn-primary" onClick={saveName}>Save</button>
+                        )}
+                        {saved && <span className="text-success" role="status">Saved</span>}
+                        <span className="ms-auto" />
+                        <button className="btn btn-outline-secondary" onClick={logout}>Log out</button>
+                        <button className="btn btn-outline-danger" onClick={deactivate}>Deactivate</button>
+                    </div>
                 </div>
-                <div className="col-md-6">
-                    <label className="form-label">Handle</label>
-                    <input className="form-control" placeholder="@username" />
-                </div>
-                <div className="col-12">
-                    <label className="form-label">Bio</label>
-                    <textarea className="form-control" rows={3} placeholder="Short bio" />
-                </div>
-            </div>
-            <div className="mt-3">
-                <button className="btn btn-primary">Save</button>
-            </div>
+            ) : (
+                <p style={{ color: 'var(--muted)' }}>You are not logged in. Please sign in to manage your profile.</p>
+            )}
         </section>
     );
 }
 
-function AccountPanel() {
-    return (
-        <section>
-            <h2 className="h5 fw-bold mb-3">Account</h2>
-            <div className="row g-3">
-                <div className="col-md-6">
-                    <label className="form-label">Email</label>
-                    <input type="email" className="form-control" placeholder="you@example.com" />
-                </div>
-                <div className="col-md-6">
-                    <label className="form-label">Change password</label>
-                    <input type="password" className="form-control" placeholder="New password" />
-                </div>
-            </div>
-            <div className="mt-3 d-flex gap-2">
-                <button className="btn btn-primary">Update</button>
-                <button className="btn btn-outline-danger">Deactivate</button>
-            </div>
-        </section>
-    );
-}
+// Account panel removed as per requirement
 
 function PrivacyPanel() {
     return (
@@ -220,7 +272,6 @@ function AdvancedPanel() {
 
 const panelMap = {
     profile: ProfilePanel,
-    account: AccountPanel,
     privacy: PrivacyPanel,
     notifications: NotificationsPanel,
     appearance: AppearancePanel,
@@ -231,19 +282,54 @@ const panelMap = {
 
 const Settings = () => {
     const [active, setActive] = useState('appearance');
+    const [user, setUser] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const Panel = useMemo(() => panelMap[active] ?? AppearancePanel, [active]);
+
+    // Read user cookie on mount and when window regains focus
+    useEffect(() => {
+        const updateFromCookie = () => {
+            const raw = getCookie('qs-user');
+            if (!raw) {
+                setUser(null);
+                setIsLoggedIn(false);
+                return;
+            }
+            try {
+                const parsed = JSON.parse(raw);
+                setUser(parsed);
+                setIsLoggedIn(true);
+            } catch {
+                // Not JSON? Consider any value as logged in flag
+                setUser(null);
+                setIsLoggedIn(true);
+            }
+        };
+        updateFromCookie();
+        window.addEventListener('focus', updateFromCookie);
+        return () => window.removeEventListener('focus', updateFromCookie);
+    }, []);
+
+    const availableSections = isLoggedIn ? sections : limitedSections;
+
+    // Ensure active section is always valid for current availability
+    useEffect(() => {
+        if (!availableSections.find(s => s.id === active)) {
+            setActive(availableSections[0]?.id || 'appearance');
+        }
+    }, [isLoggedIn]);
 
     return (
         <div style={{ minHeight: '100vh', width: '100vw', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
             <Navbar />
             <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
-                <Sidebar active={active} onSelect={setActive} />
+                <Sidebar items={availableSections} active={active} onSelect={setActive} />
 
                 <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <MobileSectionPicker active={active} onSelect={setActive} />
+                    <MobileSectionPicker items={availableSections} active={active} onSelect={setActive} />
                     <div className="container-fluid" style={{ padding: '1rem' }}>
                         <div className="surface shadow-soft rounded-4 p-4 p-md-5" style={{ maxWidth: 900, width: '100%', border: '1px solid var(--border)' }}>
-                            <Panel />
+                            <Panel user={user} onUserUpdate={setUser} />
                         </div>
                     </div>
                 </main>

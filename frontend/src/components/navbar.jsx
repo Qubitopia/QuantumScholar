@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { FiSettings, FiMenu, FiX } from 'react-icons/fi';
+import { FiSettings, FiMenu, FiX, FiUser } from 'react-icons/fi';
 import logo from '../assets/Qubitopia-logo-transparent-1456x1456.png';
+import { getCookie } from '../common/cookie.js';
 
 const styles = {
     navbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', borderBottom: '1px solid var(--border)', padding: '0.75rem 1rem', background: 'var(--bg-elev)', color: 'var(--text)' },
@@ -16,13 +17,21 @@ const styles = {
         toggleBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 999, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)' },
         mobileMenu: { background: 'var(--bg-elev)', borderTop: '1px solid var(--border)' },
         mobileLink: { display: 'block', padding: '0.875rem 1rem', color: 'var(--text)', textDecoration: 'none', borderBottom: '1px solid var(--border)' },
-    logo:{ width: '150%', height: 'auto'}
+    logo:{ width: '150%', height: 'auto'},
+    avatarBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border)', background: 'rgba(148,163,184,0.12)', color: 'var(--text)' }
 };
 
 function navbar() {
     const [open, setOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => getCookie('qs-user') != null);
     const toggle = () => setOpen((v) => !v);
     const close = () => setOpen(false);
+    useEffect(() => {
+        const update = () => setIsLoggedIn(getCookie('qs-user') != null);
+        update();
+        window.addEventListener('focus', update);
+        return () => window.removeEventListener('focus', update);
+    }, []);
 
     return (
         <>
@@ -40,16 +49,26 @@ function navbar() {
                         <Link to="/" style={styles.navLinks}>Home</Link>
                         <Link to="/classroom" style={styles.navLinks}>Classroom</Link>
                         <Link to="/contact" style={styles.navLinks}>Contact</Link>
-                        <Link to="/settings" style={styles.navLinks} aria-label="Settings">
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <FiSettings size={16} />
-                                <span>Settings</span>
-                            </span>
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link to="/settings" aria-label="Open Settings" title="Settings" style={{ textDecoration: 'none' }}>
+                                <span style={styles.avatarBtn}>
+                                    <FiUser size={18} />
+                                </span>
+                            </Link>
+                        ) : (
+                            <Link to="/settings" style={styles.navLinks} aria-label="Settings">
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <FiSettings size={16} />
+                                    <span>Settings</span>
+                                </span>
+                            </Link>
+                        )}
                     </div>
-                    <Link to="/login" style={styles.navbarLogin}>
-                        <span style={styles.navbarLoginHover}>Log In</span>
-                    </Link>
+                    {!isLoggedIn && (
+                        <Link to="/login" style={styles.navbarLogin}>
+                            <span style={styles.navbarLoginHover}>Log In</span>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile toggle */}
@@ -70,11 +89,13 @@ function navbar() {
                             <span>Settings</span>
                         </span>
                     </Link>
-                    <div style={{ padding: '0.75rem 1rem' }}>
-                        <Link to="/login" onClick={close} style={{ ...styles.navbarLogin, width: '100%' }}>
-                            <span style={styles.navbarLoginHover}>Log In</span>
-                        </Link>
-                    </div>
+                    {!isLoggedIn && (
+                        <div style={{ padding: '0.75rem 1rem' }}>
+                            <Link to="/login" onClick={close} style={{ ...styles.navbarLogin, width: '100%' }}>
+                                <span style={styles.navbarLoginHover}>Log In</span>
+                            </Link>
+                        </div>
+                    )}
                 </nav>
             )}
         </>

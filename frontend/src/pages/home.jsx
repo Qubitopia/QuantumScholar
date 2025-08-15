@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, InputGroup, Badge, Card, Modal } from 'react-bootstrap';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
-
+import logo from '../assets/Qubitopia-logo-transparent-1456x1456.png';
 const Home = () => {
     const [query, setQuery] = useState('');
     const [showAIModal, setShowAIModal] = useState(false);
@@ -31,9 +31,7 @@ const Home = () => {
             <section className="py-5 py-lg-6">
                 <Container className="text-center">
                     <div className="mx-auto mb-4" style={{ width: 64, height: 64 }}>
-                        <svg viewBox="0 0 48 48" width="64" height="64" role="img" aria-label="QuantumScholar logo">
-                            <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="#0d6efd"></path>
-                        </svg>
+                        <img src={logo} alt="QuantumScholar Logo" style={{ width: '100%', height: '100%' }} />
                     </div>
                     <h1 className="display-5 fw-bold mb-3 gradient-text">QuantumScholar Exams</h1>
                       <p className="lead mx-auto" style={{ maxWidth: 720, color: 'var(--muted)' }}>

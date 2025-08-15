@@ -14,7 +14,7 @@ const Login = () => {
     try {
       setStatus('sending');
       setMessage('');
-      await apiPost('/auth/login', { 'email': email });
+      await apiPost('/auth/login', { "email": email });
       setStatus('sent');
       setMessage('Magic link sent. Please check your email.');
     } catch (err) {

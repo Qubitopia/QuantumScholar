@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import { apiPost } from '../common/api.js';
+import {getCookie,setCookie} from '../common/cookie.js';
 
 function useQuery() {
   const { search } = useLocation();
@@ -28,9 +29,18 @@ const Verify = () => {
         setStatus('verifying');
         const res = await apiPost('/auth/verify', { token });
         // If API sets cookies/session, we are logged in now.
+        if (res.status == 200) {
+          setStatus('success');
+          setMessage('Verification successful. Redirecting…');
+          setCookie('qs-token', res.data.token, {maxAge: 7,secure:false}); // Save token for 7 days
+          setCookie('qs-user', JSON.stringify(res.data.user), {maxAge: 7}); // Save user data
+          localStorage.setItem('qs-user', JSON.stringify(res.data.user)); // Also save in localStorage
+        } else {
+          throw new Error('Verification failed');
+        }
         setStatus('success');
         setMessage('Verification successful. Redirecting…');
-        setTimeout(() => navigate('/classroom'), 1200);
+        setTimeout(() => navigate('/settings'), 2200);
       } catch (err) {
         setStatus('error');
         setMessage(err?.response?.data?.message || 'Verification failed.');

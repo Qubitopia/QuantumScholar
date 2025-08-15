@@ -18,7 +18,7 @@ function App() {
             <Route path="/classroom" element={<Classroom />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/verify" element={<Verify />} />
+            <Route path="/auth/verify" element={<Verify />} />
           </>
         ) : (
           <>
@@ -26,7 +26,7 @@ function App() {
             <Route path="/classroom" element={<Classroom />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/verify" element={<Verify />} />
+            <Route path="/auth/verify" element={<Verify />} />
           </>
         )}
       </Routes>
