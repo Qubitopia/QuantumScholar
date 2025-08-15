@@ -15,16 +15,12 @@ const Home = () => {
 
     const submitSearch = (e) => {
         e.preventDefault();
-        // Navigate to search results when implemented
-        // For now, send to classroom with query param
-        window.location.href = `/classroom?search=${encodeURIComponent(query)}`;
     };
 
     const handleAIGenerate = (e) => {
         e.preventDefault();
         // This is a UI placeholder; wire to your backend/AI service later
         const params = new URLSearchParams({ prompt: aiPrompt, level: aiLevel, count: String(aiCount) });
-        window.location.href = `/classroom?mode=create&ai=1&${params.toString()}`;
     };
 
     return (

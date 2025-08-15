@@ -14,11 +14,12 @@ const Login = () => {
     try {
       setStatus('sending');
       setMessage('');
-      await apiPost('/auth/login', { email });
+      await apiPost('/auth/login', { 'email': email });
       setStatus('sent');
       setMessage('Magic link sent. Please check your email.');
     } catch (err) {
       setStatus('error');
+      console.error('Login error:', err);
       setMessage(err?.response?.data?.message || 'Failed to send magic link');
     }
   };

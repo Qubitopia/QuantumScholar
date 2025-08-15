@@ -9,7 +9,6 @@ import Verify from './pages/verify.jsx';
 function App() {
   // Example: userType could be determined from authentication or context
   const userType = "admin"; // or "teacher"
-
   return (
     <Router>
       <Routes>
