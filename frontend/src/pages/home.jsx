@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, InputGroup, Badge, Card, Modal } from 'react-bootstrap';
 import Navbar from '../components/navbar.jsx';
@@ -21,6 +21,7 @@ const Home = () => {
         e.preventDefault();
         // This is a UI placeholder; wire to your backend/AI service later
         const params = new URLSearchParams({ prompt: aiPrompt, level: aiLevel, count: String(aiCount) });
+        console.log(params.toString());
     };
 
     return (

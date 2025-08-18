@@ -21,7 +21,7 @@ const styles = {
     avatarBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border)', background: 'rgba(148,163,184,0.12)', color: 'var(--text)' }
 };
 
-function navbar() {
+function Navbar() {
     const [open, setOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(() => getCookie('qs-user') != null);
     const toggle = () => setOpen((v) => !v);
@@ -102,4 +102,4 @@ function navbar() {
     );
 }
 
-export default navbar;
+export default Navbar;

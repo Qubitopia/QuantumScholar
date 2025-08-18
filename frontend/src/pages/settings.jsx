@@ -4,8 +4,8 @@ import { useTheme } from '../common/theme.jsx';
 import { FiUser, FiBell, FiLock, FiMonitor, FiCreditCard, FiSliders } from 'react-icons/fi';
 import { TfiPlug } from "react-icons/tfi";
 import { getCookie, setCookie, deleteCookie } from '../common/cookie.js';
-import { apiPost } from '../common/api.js';
-import { apiPut } from '../common/api.js';
+import { apiPut,apiPost,apiGet } from '../common/api.js';
+import { useNavigate } from 'react-router-dom';
 const sections = [
     { id: 'profile', label: 'Profile', icon: FiUser },
     { id: 'privacy', label: 'Privacy', icon: FiLock },
@@ -20,6 +20,13 @@ const limitedSections = [
     { id: 'billing', label: 'Billing', icon: FiCreditCard },
     { id: 'advanced', label: 'Advanced', icon: FiSliders },
 ];
+
+async function loadData(token) {
+  const { data } = await apiGet('/api/profile', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  setCookie('qs-user', JSON.stringify(data.user), { days: 7 });
+  console.log(data);
+  return data.user;
+}
 
 function Sidebar({ items, active, onSelect }) {
     return (
@@ -96,12 +103,25 @@ function AppearancePanel() {
 }
 
 function ProfilePanel({ user, onUserUpdate }) {
+    const navigate = useNavigate();
     const [name, setName] = useState('');
     const [saved, setSaved] = useState(false);
-
+    
     useEffect(() => {
-        setName(user?.Name || user?.name || '');
-        setSaved(false);
+        let mounted = true;
+        (async () => {
+            try {
+                const profileRes = await loadData(getCookie('qs-token'));
+                if (!mounted) return;
+                setName(profileRes?.Name || profileRes?.name || '');
+                setSaved(false);
+            } catch (e) {
+                // optional: handle error state here
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
     }, [user]);
         const originalName = useMemo(() => user?.Name || user?.name || '', [user]);
         const changed = (name ?? '') !== originalName;
@@ -136,6 +156,8 @@ function ProfilePanel({ user, onUserUpdate }) {
     };
 
     const logout = async () => {
+        onUserUpdate && onUserUpdate(null);
+        navigate('/', { replace: true });
         deleteCookie('qs-user', { path: '/' });
         deleteCookie('qs-token', { path: '/' });
     };
@@ -243,20 +265,132 @@ function IntegrationsPanel() {
     );
 }
 
-function BillingPanel() {
+function BillingPanel({ user, onUserUpdate }) {
+    const [coinsToBuy, setCoinsToBuy] = useState(50);
+    const [loading, setLoading] = useState(false);
+    const [currency, setCurrency] = useState('/api/purchase-qscoins-inr');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const RZP_KEY_ID = import.meta.env.VITE_RZP_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+    const normalizedUser = getCookie('qs-user');
+
+    const handleBuy = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        const amountCoins = Number(coinsToBuy);
+        if (!user) {
+            setError('Please log in to purchase coins.');
+            return;
+        }
+        if (!amountCoins || amountCoins < 1) {
+            setError('Enter a valid coin amount (1 or more).');
+            return;
+        }
+        try {
+            setLoading(true);
+            const key = (RZP_KEY_ID || '').trim();
+            if (!key) {
+                setError('Missing Razorpay Key ID. Set VITE_RZP_KEY_ID in frontend/.env and restart dev server.');
+                setLoading(false);
+                return;
+            }
+
+            const token = getCookie('qs-token');
+            const orderRes = await apiPost(currency, { qscoins: amountCoins }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+            console.log("currency:", currency,"order currency:", orderRes.data);
+            const orderId = orderRes.data.razorpay_order_id;
+            if (!orderId) throw new Error('No order id returned by server');
+
+            const options = {
+                key,
+                amount: orderRes.data.amount,
+                currency: orderRes.data.currency,
+                name: 'QuantumScholar',
+                description: 'QS Coins purchase',
+                order_id: orderId,
+                prefill: {
+                    name: normalizedUser?.Name,
+                    email: normalizedUser?.public_email,
+                },
+                theme: { color: '#2e6da4' },
+                handler: async function (response) {
+                    try {
+                        await apiPost('/api/verify-razorpay-payment', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+
+                        try {
+                            const profileRes = loadData(token);
+                            console.log(profileRes.data.user);
+                            const updated = profileRes.data.user || null;
+                            if (updated) {
+                                    const serialized = JSON.stringify(updated);
+                                    setCookie('qs-user', serialized, { days: 7, path: '/' });
+                                    try { localStorage.setItem('qs-user', serialized); } catch { /* ignore */ }
+                                onUserUpdate && onUserUpdate(updated);
+                            }
+                        } catch { /* ignore */ }
+
+                        setSuccess('Payment verified and coins credited.');
+                    } catch (err) {
+                        setError(err?.response?.data?.message || err.message || 'Verification failed');
+                    }
+                },
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            setError(err?.response?.data?.message || err.message || 'Purchase failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <section>
+            
             <h2 className="h5 fw-bold mb-3">Billing</h2>
-            <p style={{ color: 'var(--muted)' }}>Manage your subscription and invoices.</p>
-            <div className="surface rounded-3 p-3" style={{ border: '1px solid var(--border)' }}>
-                <div className="d-flex justify-content-between">
+            <p style={{ color: 'var(--muted)' }}>Buy QS Coins and see your recent transactions.</p>
+
+            <div className="surface rounded-3 p-3 mb-3" style={{ border: '1px solid var(--border)' }}>
+                <div className="d-flex justify-content-between align-items-center">
                     <div>
-                        <div className="fw-semibold">Free plan</div>
-                        <div style={{ color: 'var(--muted)' }}>0/month</div>
+                        <div className="fw-semibold">Current balance</div>
+                        <div style={{ color: 'var(--muted)' }}>{user?.qs_coins ?? 0} QS Coins</div>
                     </div>
-                    <button className="btn btn-primary">Upgrade</button>
+                    {!user && (
+                        <a className="btn btn-outline-primary" href="/login">Log in to buy</a>
+                    )}
                 </div>
             </div>
+
+            <form className="surface rounded-3 p-3 mb-4" style={{ border: '1px solid var(--border)' }} onSubmit={handleBuy}>
+                <div className="row g-3 align-items-end">
+                    <div className="col-sm-4">
+                        <label className="form-label">QS Coins to buy</label>
+                        <input type="number" min={1} className="form-control" value={coinsToBuy}
+                               onChange={(e) => setCoinsToBuy(parseInt(e.target.value || '0', 10))} />
+                    </div>
+                    <div className="col-sm-3">
+                        <label className="form-label">Currency</label>
+                        <select className="form-select" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                            <option value="/api/purchase-qscoins-inr">INR (Razorpay)</option>
+                            <option value="/api/purchase-qscoins-usd">USD (Razorpay)</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="d-flex gap-2 mt-3">
+                    <button type="submit" className="btn btn-primary" disabled={loading || !user}>
+                        {loading ? 'Processing…' : 'Buy with Razorpay'}
+                    </button>
+                </div>
+                {error && <div className="text-danger mt-2">{error}</div>}
+                {success && <div className="text-success mt-2">{success}</div>}
+            </form>
         </section>
     );
 }
@@ -281,9 +415,13 @@ const panelMap = {
 };
 
 const Settings = () => {
-    const [active, setActive] = useState('appearance');
-    const [user, setUser] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(() => {
+        const raw = getCookie('qs-user');
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch { return null; }
+    });
+    const [isLoggedIn, setIsLoggedIn] = useState(() => !!getCookie('qs-user'));
+    const [active, setActive] = useState(() => (getCookie('qs-user') ? 'profile' : 'appearance'));
     const Panel = useMemo(() => panelMap[active] ?? AppearancePanel, [active]);
 
     // Read user cookie on mount and when window regains focus

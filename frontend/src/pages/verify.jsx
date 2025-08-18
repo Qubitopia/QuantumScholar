@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import { apiPost } from '../common/api.js';
-import {getCookie,setCookie} from '../common/cookie.js';
+import { setCookie } from '../common/cookie.js';
 
 function useQuery() {
   const { search } = useLocation();
