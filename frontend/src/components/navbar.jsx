@@ -36,13 +36,14 @@ function Navbar() {
     return (
         <>
             <header style={styles.navbar}>
+                <Link to='/' style={styles.navLinks}>
                 <div style={styles.navBrand}>
                     <div style={styles.navbarLogo}>
                         <img src={logo} alt="QuantumScholar Logo" style={styles.logo} />
                     </div>
                     <h2 style={styles.navbarTitle}>QuantumScholar</h2>
                 </div>
-
+                </Link>
                 {/* Desktop nav */}
                 <div className="d-none d-md-flex" style={styles.navbarLinksDiv1}>
                     <div style={styles.navbarLinksDiv2}>

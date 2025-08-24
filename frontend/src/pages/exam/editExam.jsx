@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { apiGet } from '../../common/api.js';
 import { getCookie } from '../../common/cookie.js';
+import { useQuery } from '../../common/appUtils.js';
 
 export default function EditExam() {
-  const { id } = useParams(); // this is the test_id from the URL
+  const query = useQuery();
+  const id = query.get('test_id');
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

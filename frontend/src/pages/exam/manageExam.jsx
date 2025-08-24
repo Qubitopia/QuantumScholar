@@ -29,8 +29,8 @@ export default function ManageExam() {
 		const token = getCookie('qs-token');
 		setLoading(true);
 		apiGet('/api/test', { token })
-		  .then(res => setExams(res?.data?.tests || []))
-		  .catch(err => setError(err?.response?.data?.message || err.message || 'Failed to load exams'))
+		  .then(res => setExams(res.data.tests || []))
+		  .catch(err => setError('No Exams Found'))
 		  .finally(() => setLoading(false));
 	}, []);
 
@@ -44,7 +44,7 @@ export default function ManageExam() {
         console.error('Invalid exam ID');
         return;
     }
-    navigate(`/exam/editExam/${examId}`);
+	navigate(`/exam/editExam?test_id=${encodeURIComponent(examId)}`);
     };
 
 

@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Form, InputGroup, Badge, Card, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import logo from '../assets/Qubitopia-logo-transparent-1456x1456.png';

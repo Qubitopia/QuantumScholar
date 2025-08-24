@@ -21,7 +21,7 @@ function App() {
             <Route path="/auth/verify" element={<Verify />} />
             <Route path="/authNewUser/verify" element={<NewAuth />} />
             <Route path="/exam/manageExam" element={<ManageExam />} />
-            <Route path="/exam/editExam/:id" element={<EditExam />} />
+            <Route path="/exam/editExam" element={<EditExam />} />
           </>
         ) : (
           <>

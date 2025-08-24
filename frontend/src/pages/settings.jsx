@@ -1,11 +1,13 @@
-import {useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/navbar.jsx';
 import { useTheme } from '../common/theme.jsx';
 import { FiUser, FiBell, FiLock, FiMonitor, FiCreditCard, FiSliders } from 'react-icons/fi';
 import { TfiPlug } from "react-icons/tfi";
 import { getCookie, setCookie, deleteCookie } from '../common/cookie.js';
-import { apiPut,apiPost,apiGet } from '../common/api.js';
+import { apiPut, apiPost, apiGet } from '../common/api.js';
 import { useNavigate } from 'react-router-dom';
+import { formatDate } from '../common/appUtils.js';
+
 const sections = [
     { id: 'profile', label: 'Profile', icon: FiUser },
     { id: 'privacy', label: 'Privacy', icon: FiLock },
@@ -22,10 +24,10 @@ const limitedSections = [
 ];
 
 async function loadData(token) {
-  const { data } = await apiGet('/api/profile', { token });
-  setCookie('qs-user', JSON.stringify(data.user), { days: 7 });
-  console.log(data);
-  return data.user;
+    const { data } = await apiGet('/api/profile', { token });
+    setCookie('qs-user', JSON.stringify(data.user), { days: 7 });
+    console.log(data);
+    return data.user;
 }
 
 function Sidebar({ items, active, onSelect }) {
@@ -106,7 +108,7 @@ function ProfilePanel({ user, onUserUpdate }) {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [saved, setSaved] = useState(false);
-    
+
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -123,26 +125,15 @@ function ProfilePanel({ user, onUserUpdate }) {
             mounted = false;
         };
     }, []);
-        const originalName = useMemo(() => user?.Name || user?.name || '', [user]);
-        const changed = (name ?? '') !== originalName;
-
-    const fmt = (value) => {
-        if (!value) return '';
-        const d = new Date(value);
-        if (isNaN(d.getTime())) return String(value);
-        try {
-            return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
-        } catch {
-            return d.toLocaleString();
-        }
-    };
+    const originalName = useMemo(() => user?.Name || user?.name || '', [user]);
+    const changed = (name ?? '') !== originalName;
 
     const saveName = () => {
         if (!user) return;
         const updated = { ...user, Name: name };
         setCookie('qs-user', JSON.stringify(updated), { days: 7 });
         const token = getCookie('qs-token');
-        apiPut('/api/profile', { 'Name': name }, {token}).then(() => {
+        apiPut('/api/profile', { 'Name': name }, { token }).then(() => {
             onUserUpdate && onUserUpdate(updated);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
@@ -161,7 +152,7 @@ function ProfilePanel({ user, onUserUpdate }) {
         deleteCookie('qs-user', { path: '/' });
         deleteCookie('qs-token', { path: '/' });
         localStorage.removeItem('qs-user');
-        
+
     };
 
     return (
@@ -191,11 +182,11 @@ function ProfilePanel({ user, onUserUpdate }) {
                     </div>
                     <div className="col-md-6">
                         <label className="form-label">Created At</label>
-                        <input className="form-control" value={fmt(user.created_at)} disabled />
+                        <input className="form-control" value={formatDate(user.created_at)} disabled />
                     </div>
                     <div className="col-md-6">
                         <label className="form-label">Updated At</label>
-                        <input className="form-control" value={fmt(user.updated_at)} disabled />
+                        <input className="form-control" value={formatDate(user.updated_at)} disabled />
                     </div>
                     <div className="col-12 d-flex align-items-center gap-2 mt-2">
                         {changed && name?.trim() && (
@@ -271,9 +262,18 @@ function BillingPanel({ user, onUserUpdate }) {
     const [currency, setCurrency] = useState('/api/purchase-qscoins-inr');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const RZP_KEY_ID = import.meta.env.VITE_RZP_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+    const RZP_KEY_ID = import.meta.env.VITE_RZP_KEY_ID;
     const token = getCookie('qs-token');
+    const [orders, setOrders] = useState([]);
 
+    useEffect(() => {
+        fetchOrders();
+    }, [success]);
+
+    const fetchOrders = async () => {
+        const res = await apiGet('/api/orders', { token });
+        setOrders(res.data.orders);
+    };
 
     const handleBuy = async (e) => {
         e.preventDefault();
@@ -298,7 +298,7 @@ function BillingPanel({ user, onUserUpdate }) {
             }
 
             const orderRes = await apiPost(currency, { qscoins: amountCoins }, { token });
-            console.log("currency:", currency,"order currency:", orderRes.data);
+            console.log("currency:", currency, "order currency:", orderRes.data);
             const orderId = orderRes.data.razorpay_order_id;
             if (!orderId) throw new Error('No order id returned by server');
 
@@ -347,9 +347,16 @@ function BillingPanel({ user, onUserUpdate }) {
         }
     };
 
+    const statusBadge = (s) => {
+        const lower = String(s || '').toLowerCase();
+        const color = lower === 'completed' ? 'success' : lower === 'pending' ? 'warning' : 'secondary';
+        return <span className={`badge bg-${color}`}>{s}</span>;
+    };
+
+
     return (
         <section>
-            
+
             <h2 className="h5 fw-bold mb-3">Billing</h2>
             <p style={{ color: 'var(--muted)' }}>Buy QS Coins and see your recent transactions.</p>
 
@@ -370,7 +377,7 @@ function BillingPanel({ user, onUserUpdate }) {
                     <div className="col-sm-4">
                         <label className="form-label">QS Coins to buy</label>
                         <input type="number" min={1} className="form-control" value={coinsToBuy}
-                               onChange={(e) => setCoinsToBuy(parseInt(e.target.value || '0', 10))} />
+                            onChange={(e) => setCoinsToBuy(parseInt(e.target.value || '0', 10))} />
                     </div>
                     <div className="col-sm-3">
                         <label className="form-label">Currency</label>
@@ -388,6 +395,40 @@ function BillingPanel({ user, onUserUpdate }) {
                 {error && <div className="text-danger mt-2">{error}</div>}
                 {success && <div className="text-success mt-2">{success}</div>}
             </form>
+
+            {/* Recent orders */}
+            <div style={{ marginTop: 8 }}>
+                <h3 className="h6 fw-semibold mb-2">Recent orders</h3>
+
+                {!orders || orders.length === 0 ? (
+                    <div style={{ color: 'var(--muted)' }}>No orders found.</div>
+                ) : (
+                    <div className="table-responsive">
+                        <table className="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>QS Coins</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orders.map(o => (
+                                    <tr key={o.order_id}>
+                                        <td>#{o.order_id}</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>{formatDate(o.date_time)}</td>
+                                        <td>{o.amount} {o.currency}</td>
+                                        <td>{o.qs_coins_purchased}</td>
+                                        <td>{statusBadge(o.payment_status)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </section>
     );
 }
@@ -463,7 +504,7 @@ const Settings = () => {
                 <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <MobileSectionPicker items={availableSections} active={active} onSelect={setActive} />
                     <div className="container-fluid" style={{ padding: '1rem' }}>
-                        <div className="surface shadow-soft rounded-4 p-4 p-md-5" style={{ maxWidth: 900, width: '100%', border: '1px solid var(--border)' }}>
+                        <div className="surface shadow-soft rounded-4 p-4 p-md-5" style={{ width: '100%', border: '1px solid var(--border)' }}>
                             <Panel user={user} onUserUpdate={setUser} />
                         </div>
                     </div>

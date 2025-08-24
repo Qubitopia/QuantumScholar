@@ -4,7 +4,7 @@ import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import { apiPost } from '../common/api.js';
 import { setCookie } from '../common/cookie.js';
-import {useQuery} from '../common/query.js';
+import {useQuery} from '../common/appUtils.js';
 
 const Verify = () => {
   const query = useQuery();
