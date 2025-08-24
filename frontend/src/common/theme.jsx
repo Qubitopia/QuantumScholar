@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-const ThemeContext = createContext({ theme: 'light', setTheme: () => {} });
+const ThemeContext = createContext({ theme: 'dark', setTheme: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('dark');
 
   // Load persisted theme
   useEffect(() => {
     const saved = localStorage.getItem('qs-theme');
-    if (saved === 'light' || saved === 'dark') {
+    if (saved === 'dark' || saved === 'light') {
       setTheme(saved);
     }
   }, []);

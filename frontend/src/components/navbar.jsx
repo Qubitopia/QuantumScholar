@@ -47,8 +47,7 @@ function Navbar() {
                 <div className="d-none d-md-flex" style={styles.navbarLinksDiv1}>
                     <div style={styles.navbarLinksDiv2}>
                         <Link to="/" style={styles.navLinks}>Home</Link>
-                        <Link to="/classroom" style={styles.navLinks}>Classroom</Link>
-                        <Link to="/contact" style={styles.navLinks}>Contact</Link>
+                        <Link to="/exam/manageExam" style={styles.navLinks}>Manage Exams</Link>
                         {isLoggedIn ? (
                             <Link to="/settings" aria-label="Open Settings" title="Settings" style={{ textDecoration: 'none' }}>
                                 <span style={styles.avatarBtn}>
@@ -81,7 +80,6 @@ function Navbar() {
             {open && (
                 <nav className="d-md-none" style={styles.mobileMenu}>
                     <Link to="/" style={styles.mobileLink} onClick={close}>Home</Link>
-                    <Link to="/classroom" style={styles.mobileLink} onClick={close}>Classroom</Link>
                     <Link to="/contact" style={styles.mobileLink} onClick={close}>Contact</Link>
                     <Link to="/settings" style={styles.mobileLink} onClick={close}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>

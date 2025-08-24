@@ -1,12 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import { apiPost } from '../common/api.js';
+import { getCookie } from '../common/cookie.js';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [message, setMessage] = useState('');
+  const token = getCookie('qs-token');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      navigate('/settings');
+      return;
+    }
+  }, [token]);
 
   const submit = async (e) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/navbar.jsx';
 import { useTheme } from '../common/theme.jsx';
 import { FiUser, FiBell, FiLock, FiMonitor, FiCreditCard, FiSliders } from 'react-icons/fi';
@@ -22,7 +22,7 @@ const limitedSections = [
 ];
 
 async function loadData(token) {
-  const { data } = await apiGet('/api/profile', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const { data } = await apiGet('/api/profile', { token });
   setCookie('qs-user', JSON.stringify(data.user), { days: 7 });
   console.log(data);
   return data.user;
@@ -122,7 +122,7 @@ function ProfilePanel({ user, onUserUpdate }) {
         return () => {
             mounted = false;
         };
-    }, [user]);
+    }, []);
         const originalName = useMemo(() => user?.Name || user?.name || '', [user]);
         const changed = (name ?? '') !== originalName;
 
@@ -142,7 +142,7 @@ function ProfilePanel({ user, onUserUpdate }) {
         const updated = { ...user, Name: name };
         setCookie('qs-user', JSON.stringify(updated), { days: 7 });
         const token = getCookie('qs-token');
-        apiPut('/api/profile', { 'Name': name }, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
+        apiPut('/api/profile', { 'Name': name }, {token}).then(() => {
             onUserUpdate && onUserUpdate(updated);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
@@ -160,6 +160,8 @@ function ProfilePanel({ user, onUserUpdate }) {
         navigate('/', { replace: true });
         deleteCookie('qs-user', { path: '/' });
         deleteCookie('qs-token', { path: '/' });
+        localStorage.removeItem('qs-user');
+        
     };
 
     return (
@@ -211,8 +213,6 @@ function ProfilePanel({ user, onUserUpdate }) {
         </section>
     );
 }
-
-// Account panel removed as per requirement
 
 function PrivacyPanel() {
     return (
@@ -272,7 +272,8 @@ function BillingPanel({ user, onUserUpdate }) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const RZP_KEY_ID = import.meta.env.VITE_RZP_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY_ID || '';
-    const normalizedUser = getCookie('qs-user');
+    const token = getCookie('qs-token');
+
 
     const handleBuy = async (e) => {
         e.preventDefault();
@@ -296,8 +297,7 @@ function BillingPanel({ user, onUserUpdate }) {
                 return;
             }
 
-            const token = getCookie('qs-token');
-            const orderRes = await apiPost(currency, { qscoins: amountCoins }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+            const orderRes = await apiPost(currency, { qscoins: amountCoins }, { token });
             console.log("currency:", currency,"order currency:", orderRes.data);
             const orderId = orderRes.data.razorpay_order_id;
             if (!orderId) throw new Error('No order id returned by server');
@@ -310,8 +310,8 @@ function BillingPanel({ user, onUserUpdate }) {
                 description: 'QS Coins purchase',
                 order_id: orderId,
                 prefill: {
-                    name: normalizedUser?.Name,
-                    email: normalizedUser?.public_email,
+                    name: user?.Name,
+                    email: user?.public_email,
                 },
                 theme: { color: '#2e6da4' },
                 handler: async function (response) {
@@ -320,19 +320,16 @@ function BillingPanel({ user, onUserUpdate }) {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                        }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-
-                        try {
-                            const profileRes = loadData(token);
-                            console.log(profileRes.data.user);
-                            const updated = profileRes.data.user || null;
-                            if (updated) {
-                                    const serialized = JSON.stringify(updated);
-                                    setCookie('qs-user', serialized, { days: 7, path: '/' });
-                                    try { localStorage.setItem('qs-user', serialized); } catch { /* ignore */ }
-                                onUserUpdate && onUserUpdate(updated);
+                        }, { token });
+                        await loadData(token).then(profileRes => {
+                            console.log(profileRes);
+                            if (profileRes) {
+                                const serialized = JSON.stringify(profileRes);
+                                setCookie('qs-user', serialized, { days: 7, path: '/' });
+                                localStorage.setItem('qs-user', serialized);
+                                onUserUpdate && onUserUpdate(profileRes);
                             }
-                        } catch { /* ignore */ }
+                        });
 
                         setSuccess('Payment verified and coins credited.');
                     } catch (err) {

@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar.jsx';
 import Footer from '../components/footer.jsx';
 import { apiPost } from '../common/api.js';
 import { setCookie } from '../common/cookie.js';
-
-function useQuery() {
-  const { search } = useLocation();
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-}
+import {useQuery} from '../common/query.js';
 
 const Verify = () => {
   const query = useQuery();
