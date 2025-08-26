@@ -27,6 +27,20 @@ export default function ManageExam() {
 
 	useEffect(() => {
 		const token = getCookie('qs-token');
+		if (!token) {
+			let counter = 3;
+			setError(`No Authentication Redirecting in ${counter}...`);
+			const timer = setInterval(() => {
+				counter -= 1;
+				if (counter <= 0) {
+					clearInterval(timer);
+					navigate('/login');
+				} else {
+					setError(`No Authentication Redirecting in ${counter}...`);
+				}
+			}, 1000);
+			return () => clearInterval(timer);
+		}
 		setLoading(true);
 		apiGet('/api/test', { token })
 		  .then(res => setExams(res.data.tests || []))

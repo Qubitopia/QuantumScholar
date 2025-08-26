@@ -84,22 +84,26 @@ function MobileSectionPicker({ items, active, onSelect }) {
 }
 
 function AppearancePanel() {
-    const { theme, setTheme } = useTheme();
+    const { mode, theme, setMode } = useTheme();
     return (
         <section>
             <h2 className="h5 fw-bold mb-3">Appearance</h2>
             <p style={{ color: 'var(--muted)' }}>Choose how QuantumScholar looks on this device.</p>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 12 }}>
-                <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input type="radio" name="theme" value="light" checked={theme === 'light'} onChange={() => setTheme('light')} />
-                    Light
-                </label>
-                <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input type="radio" name="theme" value="dark" checked={theme === 'dark'} onChange={() => setTheme('dark')} />
-                    Dark
-                </label>
+            <div style={{ marginTop: 12, maxWidth: 320 }}>
+                <label className="form-label">Theme</label>
+                <select
+                    className="form-select"
+                    style={{ width: 160 }}
+                    value={mode}
+                    onChange={(e) => setMode(e.target.value)}>
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
             </div>
-            <p style={{ color: 'var(--muted)', marginTop: 8 }}>Preference is saved locally.</p>
+            {/* linebreak */}
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '1rem 0' }} />
+            <small style={{ color: 'var(--muted)' }}>Applied: {theme}</small>
         </section>
     );
 }
@@ -266,10 +270,6 @@ function BillingPanel({ user, onUserUpdate }) {
     const token = getCookie('qs-token');
     const [orders, setOrders] = useState([]);
 
-    useEffect(() => {
-        fetchOrders();
-    }, [success]);
-
     const fetchOrders = async () => {
         const res = await apiGet('/api/orders', { token });
         setOrders(res.data.orders);
@@ -353,6 +353,9 @@ function BillingPanel({ user, onUserUpdate }) {
         return <span className={`badge bg-${color}`}>{s}</span>;
     };
 
+    useEffect(() => {
+        fetchOrders();
+    }, [success]);
 
     return (
         <section>
