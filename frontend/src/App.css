@@ -1,0 +1,192 @@
+/* Utilities for Home page */
+/* Theme variables */
+:root[data-theme='light'] {
+	--bg: #f8fafc;
+	--bg-elev: #ffffff;
+	--text: #0f172a;
+	--muted: #64748b;
+	--border: rgba(15,23,42,0.08);
+	--card-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.18), 0 6px 16px -8px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='dark'] {
+	--bg: #0b1220;
+	--bg-elev: #0f172a;
+	--text: #e2e8f0;
+	--muted: #94a3b8;
+	--border: rgba(148,163,184,0.15);
+	--card-shadow: 0 10px 30px -12px rgba(0,0,0,0.6), 0 6px 16px -8px rgba(0,0,0,0.45);
+}
+
+html, body, #root {
+	height: 100%;
+}
+
+body {
+	color: var(--text);
+	background: var(--bg);
+}
+
+/* Utilities for Home page */
+.gradient-text {
+	background: linear-gradient(90deg, #0d6efd, #20c997, #6f42c1);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.glass {
+	background: color-mix(in srgb, var(--bg-elev) 85%, transparent);
+	backdrop-filter: saturate(120%) blur(8px);
+	-webkit-backdrop-filter: saturate(120%) blur(8px);
+	border: 1px solid var(--border);
+}
+
+.shadow-soft {
+	box-shadow: var(--card-shadow);
+}
+
+.icon-circle {
+	display: inline-flex;
+	width: 40px;
+	height: 40px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+}
+
+.search-input::placeholder {
+	color: #94a3b8;
+}
+
+.floating-badges .badge {
+	border: 1px solid var(--border);
+}
+
+/* Generic themed surfaces */
+.surface {
+	background: var(--bg-elev);
+	color: var(--text);
+	border: 1px solid var(--border);
+}
+
+/* Chips that look good in both themes */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: 9999px;
+	font-size: 0.85rem;
+	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+	color: var(--text);
+}
+
+/* Outline button that adapts to theme */
+.btn-outline-surface {
+	border: 1px solid var(--border) !important;
+	color: var(--text) !important;
+	background: transparent !important;
+}
+.btn-outline-surface:hover {
+	background: color-mix(in srgb, var(--bg-elev) 88%, transparent) !important;
+}
+
+/* Inputs inside glass containers should blend in */
+.glass .form-control {
+	background: transparent !important;
+	color: var(--text) !important;
+}
+.glass .form-control::placeholder {
+	color: var(--muted) !important;
+}
+.glass .input-group-text {
+	color: var(--muted) !important;
+}
+
+/* Generic inputs */
+input, textarea, select {
+	background: var(--bg-elev);
+	color: var(--text);
+	border: 1px solid var(--border);
+}
+input::placeholder, textarea::placeholder {
+	color: var(--muted);
+	opacity: 0.95; /* ensure strong contrast, especially in dark mode */
+}
+.form-control::placeholder {
+	color: var(--muted) !important;
+	opacity: 0.95 !important;
+}
+/* WebKit fallback */
+::-webkit-input-placeholder {
+	color: var(--muted);
+	opacity: 1;
+}
+/* Edge/IE legacy fallbacks (harmless in modern browsers) */
+:-ms-input-placeholder {
+	color: var(--muted);
+	opacity: 1;
+}
+::-ms-input-placeholder {
+	color: var(--muted);
+	opacity: 1;
+}
+.form-control, .form-select {
+	background-color: var(--bg-elev) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}
+
+/* Themed tables (fix dark mode header/rows) */
+.table {
+	/* Override Bootstrap CSS variables when present */
+	--bs-table-bg: var(--bg-elev);
+	--bs-table-color: var(--text);
+	--bs-table-border-color: var(--border);
+	color: var(--text);
+	background: var(--bg-elev);
+}
+.table > :not(caption) > * > * {
+	background-color: var(--bg-elev);
+	color: var(--text);
+	border-bottom-color: var(--border);
+}
+.table thead th {
+	background: color-mix(in srgb, var(--bg-elev) 94%, transparent);
+	color: var(--text);
+	border-bottom-color: var(--border);
+	font-weight: 600;
+}
+.table-hover > tbody > tr:hover > * {
+	background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+}
+.table-responsive {
+	background: var(--bg-elev);
+}
+
+/* Themed list groups (fix dark mode items/active color) */
+.list-group {
+	--bs-list-group-bg: var(--bg-elev);
+	--bs-list-group-color: var(--text);
+	--bs-list-group-border-color: var(--border);
+	--bs-list-group-action-hover-bg: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+	/* Subtle active tint that works in dark mode */
+	--bs-list-group-active-bg: color-mix(in srgb, var(--bg-elev) 82%, #0d6efd 18%);
+	--bs-list-group-active-color: var(--text);
+	--bs-list-group-active-border-color: var(--border);
+}
+.list-group-item {
+	background-color: var(--bg-elev) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}
+.list-group-item-action:hover, .list-group-item-action:focus {
+	background-color: color-mix(in srgb, var(--bg-elev) 92%, transparent) !important;
+}
+.list-group-item.active {
+	background-color: color-mix(in srgb, var(--bg-elev) 82%, #0d6efd 18%) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}

@@ -1,26 +1,35 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Classroom from './pages/classroom.jsx';
 import Home from './pages/home.jsx';
 import Settings from './pages/settings.jsx';
+import Login from './pages/login.jsx';
+import Verify from './pages/verify.jsx';
+import NewAuth from './pages/newAuth.jsx';
+import ManageExam from './pages/exam/manageExam.jsx';
+import EditExam from './pages/exam/editExam.jsx';
 
 function App() {
-  // Example: userType could be determined from authentication or context
-  const userType = "teacher"; // or "teacher"
-
+  const userType = "admin";
   return (
     <Router>
       <Routes>
         {userType === "admin" ? (
           <>
             <Route path="/" element={<Home />} />
-            <Route path="/classroom" element={<Classroom />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/verify" element={<Verify />} />
+            <Route path="/authNewUser/verify" element={<NewAuth />} />
+            <Route path="/exam/manageExam" element={<ManageExam />} />
+            <Route path="/exam/editExam" element={<EditExam />} />
           </>
         ) : (
           <>
             <Route path="/" element={<Home />} />
-            <Route path="/classroom" element={<Classroom />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/verify" element={<Verify />} />
+            <Route path="/authNewUser/verify" element={<NewAuth />} />
           </>
         )}
       </Routes>

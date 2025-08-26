@@ -1,21 +1,24 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.6",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.0",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.7",
+    "dotenv": "^17.2.1",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.7.0"
   },
   "devDependencies": {
