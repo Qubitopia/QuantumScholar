@@ -54,7 +54,7 @@ function Sidebar({ items, active, onSelect }) {
                                 color: 'var(--text)',
                                 cursor: 'pointer'
                             }}>
-                            <Icon size={16} />
+                            {Icon ? <Icon size={16} /> : null}
                             <span style={{ fontSize: 14, fontWeight: 500 }}>{label}</span>
                         </button>
                     );
@@ -122,6 +122,7 @@ function ProfilePanel({ user, onUserUpdate }) {
                 setName(profileRes?.Name || profileRes?.name || '');
                 setSaved(false);
             } catch (e) {
+                console.log('Error loading profile:', e);
                 // optional: handle error state here
             }
         })();
@@ -271,8 +272,15 @@ function BillingPanel({ user, onUserUpdate }) {
     const [orders, setOrders] = useState([]);
 
     const fetchOrders = async () => {
-        const res = await apiGet('/api/orders', { token });
-        setOrders(res.data.orders);
+        try {
+            const res = await apiGet('/api/orders', { token });
+            console.log("Fetched orders:", res.data.orders);
+            setOrders(res.data.orders);
+            
+        } catch (e) {
+            setOrders([]);
+            console.error('Error fetching orders:', e);
+        }
     };
 
     const handleBuy = async (e) => {
@@ -321,6 +329,7 @@ function BillingPanel({ user, onUserUpdate }) {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                         }, { token });
+                        fetchOrders();
                         await loadData(token).then(profileRes => {
                             console.log(profileRes);
                             if (profileRes) {
@@ -338,7 +347,7 @@ function BillingPanel({ user, onUserUpdate }) {
                 },
             };
 
-            const rzp = new Razorpay(options);
+            const rzp = new window.Razorpay(options);
             rzp.open();
         } catch (err) {
             setError(err?.response?.data?.message || err.message || 'Purchase failed');
@@ -354,8 +363,11 @@ function BillingPanel({ user, onUserUpdate }) {
     };
 
     useEffect(() => {
-        fetchOrders();
-    }, [success]);
+        if (!loading) {
+            fetchOrders();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loading]);
 
     return (
         <section>
@@ -496,6 +508,7 @@ const Settings = () => {
         if (!availableSections.find(s => s.id === active)) {
             setActive(availableSections[0]?.id || 'appearance');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoggedIn]);
 
     return (

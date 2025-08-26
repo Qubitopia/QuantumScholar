@@ -15,7 +15,7 @@ const Home = () => {
                     </div>
                     <h1 className="display-5 fw-bold mb-3 gradient-text">QuantumScholar Exams</h1>
                     <p className="lead mx-auto" style={{ maxWidth: 720, color: 'var(--muted)' }}>
-                        Take proctored exams with confidence. Create assessments in minutes with AI-assisted question procurement for teachers and admins.
+                            Take proctored exams with confidence. Create assessments with a clear, manual question editor for teachers and admins.
                     </p>
 
                     {/* Primary CTAs */}
@@ -23,8 +23,8 @@ const Home = () => {
                         <Button as={Link} to="/classroom" size="lg" className="rounded-pill px-4" variant="success">
                             Take Exam
                         </Button>
-                        <Button size="lg" className="rounded-pill px-4" variant="primary" onClick={console.log("Create Exam with AI clicked")}>
-                            Create Exam
+                            <Button size="lg" className="rounded-pill px-4" variant="primary" onClick={console.log("Create Exam clicked")}>
+                                Create Exam
                         </Button>
                     </div>
                 </Container>
@@ -42,8 +42,8 @@ const Home = () => {
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" /></svg>
                                         </span>
                                     </div>
-                                    <Card.Title className="fw-bold">AI Procurement</Card.Title>
-                                    <Card.Text className="text-secondary">Source high-quality questions from your syllabus using structured prompts. Adjust difficulty, count, and tagging instantly.</Card.Text>
+                                        <Card.Title className="fw-bold">Manual Question Editor</Card.Title>
+                                        <Card.Text className="text-secondary">Build your assessments manually with MCQ, MSQ, and open-ended questions. Reorder easily and save safely.</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>

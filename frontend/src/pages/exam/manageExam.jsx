@@ -44,9 +44,12 @@ export default function ManageExam() {
 		setLoading(true);
 		apiGet('/api/test', { token })
 		  .then(res => setExams(res.data.tests || []))
-		  .catch(err => setError('No Exams Found'))
+		  .catch(err => {
+			  setError('No Exams Found');
+			  console.error(err);
+		  })
 		  .finally(() => setLoading(false));
-	}, []);
+	}, [navigate]);
 
 	const goCreate = () => {
 		setCreateError('');
@@ -145,7 +148,7 @@ export default function ManageExam() {
 											}
 											setShowCreate(false);
 											// Optional: go to edit
-											navigate(`/exam/editExam/${newId}`);
+											navigate(`/exam/editExam/?test_id=${encodeURIComponent(newId)}`);
 										} catch (err) {
 											setCreateError(err?.response?.data?.message || err.message || 'Failed to create test');
 										} finally {

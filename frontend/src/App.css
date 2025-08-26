@@ -165,3 +165,28 @@ input::placeholder, textarea::placeholder {
 .table-responsive {
 	background: var(--bg-elev);
 }
+
+/* Themed list groups (fix dark mode items/active color) */
+.list-group {
+	--bs-list-group-bg: var(--bg-elev);
+	--bs-list-group-color: var(--text);
+	--bs-list-group-border-color: var(--border);
+	--bs-list-group-action-hover-bg: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+	/* Subtle active tint that works in dark mode */
+	--bs-list-group-active-bg: color-mix(in srgb, var(--bg-elev) 82%, #0d6efd 18%);
+	--bs-list-group-active-color: var(--text);
+	--bs-list-group-active-border-color: var(--border);
+}
+.list-group-item {
+	background-color: var(--bg-elev) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}
+.list-group-item-action:hover, .list-group-item-action:focus {
+	background-color: color-mix(in srgb, var(--bg-elev) 92%, transparent) !important;
+}
+.list-group-item.active {
+	background-color: color-mix(in srgb, var(--bg-elev) 82%, #0d6efd 18%) !important;
+	color: var(--text) !important;
+	border-color: var(--border) !important;
+}

@@ -17,7 +17,7 @@ const Login = () => {
       navigate('/settings');
       return;
     }
-  }, [token]);
+  }, [token, navigate]);
 
   const submit = async (e) => {
     e.preventDefault();

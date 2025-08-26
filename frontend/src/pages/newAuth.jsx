@@ -48,13 +48,16 @@ const NewAuth = () => {
         user = prof?.data?.user ?? prof?.data ?? null;
       } catch (e) {
         user = null;
+        console.error('Could not fetch profile after update:', e);
       }
 
       if (user && typeof user === 'object') {
         try {
           setCookie('qs-user', JSON.stringify(user), { days: 7, path: '/' });
           localStorage.setItem('qs-user', JSON.stringify(user));
-        } catch {}
+        } catch (e) {
+          console.error('Could not persist user snapshot:', e);
+        }
       }
 
       setStatus('success');
