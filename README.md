@@ -12,7 +12,6 @@
 
 <p align="center">
    <img src="https://img.shields.io/badge/AI%20Proctoring-Powered%20by%20QuantumScholar-blueviolet?style=for-the-badge&logo=quantconnect&logoColor=white" alt="AI Proctoring Badge"/>
-   <img src="https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge" alt="Status Badge"/>
 </p>
 
 ---
@@ -23,38 +22,10 @@
 
 **QuantumScholar** is an AI-based proctoring website designed to ensure secure, fair, and scalable online assessments. Leveraging advanced artificial intelligence, it provides real-time monitoring, identity verification, and automated analysis to detect suspicious activities during online exams.
 
-## Features
+---
 
-- AI-powered live proctoring
-- Automated identity verification
-- Real-time cheating detection
-- Secure user authentication
-- Scalable for institutions and organizations
-- Detailed reporting and analytics
+This Project has ben archived and split into diffrent repositories for simplification nad better managment of the project. You can check the following repositories for any update.
 
-## Project Structure
-
-- `frontend/` — Web client for users and proctors
-- `server/` — Backend API, authentication, payment, and database logic
-
-## Getting Started
-
-1. Clone the repository:
-
-   ```sh
-   git clone https://github.com/Qubitopia/QuantumScholar.git
-
-   cd QuantumScholar
-   ```
-
-2. Copy the environment template and update your configuration:
-
-   ```sh
-   cp template.env .env
-   # Edit .env and fill in the required values
-   ```
-
-3. Start the application using Docker Compose:
-   ```sh
-   docker compose up
-   ```
+Website : https://github.com/Qubitopia/quantum-scholar-web
+Backend : https://github.com/Qubitopia/quantum-scholar-backend
+Test cum Anticheat Software : https://github.com/Qubitopia/quantum-scholar-proctoring-agent
